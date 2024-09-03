@@ -1,0 +1,75 @@
+-- Create table for authors
+CREATE TABLE Authors (
+    AuthorID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50)
+);
+
+-- Create table for books
+CREATE TABLE Books (
+    BookID INT PRIMARY KEY AUTO_INCREMENT,
+    Title VARCHAR(100),
+    AuthorID INT,
+    PublishedDate DATE,
+    ISBN VARCHAR(20),
+    AvailableCopies INT,
+    FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID)
+);
+
+-- Create table for borrowers
+CREATE TABLE Borrowers (
+    BorrowerID INT PRIMARY KEY AUTO_INCREMENT,
+    FirstName VARCHAR(50),
+    LastName VARCHAR(50),
+    MembershipDate DATE
+);
+
+-- Create table for transactions (book borrowing/returning)
+CREATE TABLE Transactions (
+    TransactionID INT PRIMARY KEY AUTO_INCREMENT,
+    BookID INT,
+    BorrowerID INT,
+    TransactionDate DATE,
+    ReturnDate DATE,
+    FOREIGN KEY (BookID) REFERENCES Books(BookID),
+    FOREIGN KEY (BorrowerID) REFERENCES Borrowers(BorrowerID)
+);
+-- Insert sample authors
+INSERT INTO Authors (FirstName, LastName) VALUES
+('J.K.', 'Rowling'),
+('George', 'Orwell'),
+('J.R.R.', 'Tolkien');
+
+-- Insert sample books
+INSERT INTO Books (Title, AuthorID, PublishedDate, ISBN, AvailableCopies) VALUES
+('Harry Potter and the Philosopher\'s Stone', 1, '1997-06-26', '978-0747532699', 5),
+('1984', 2, '1949-06-08', '978-0451524935', 3),
+('The Hobbit', 3, '1937-09-21', '978-0547928227', 4);
+
+-- Insert sample borrowers
+INSERT INTO Borrowers (FirstName, LastName, MembershipDate) VALUES
+('John', 'Doe', '2023-01-15'),
+('Jane', 'Smith', '2023-02-20'),
+('Emily', 'Jones', '2023-03-10');
+
+-- Insert sample transactions
+INSERT INTO Transactions (BookID, BorrowerID, TransactionDate, ReturnDate) VALUES
+(1, 1, '2024-01-01', NULL),  -- John Doe borrowed 'Harry Potter and the Philosopher\'s Stone'
+(2, 2, '2024-01-15', '2024-02-01'),  -- Jane Smith borrowed '1984'
+(3, 3, '2024-02-01', NULL);  -- Emily Jones borrowed 'The Hobbit'
+SELECT Title, AvailableCopies
+FROM Books
+WHERE AvailableCopies > 0;
+SELECT B.Title
+FROM Books B
+JOIN Authors A ON B.AuthorID = A.AuthorID
+WHERE A.LastName = 'Rowling';  -- For Author LastName = 'Rowling'
+-- Assuming BookID = 1 is returned
+UPDATE Books
+SET AvailableCopies = AvailableCopies + 1
+WHERE BookID = 1;
+
+-- Mark the transaction as completed
+UPDATE Transactions
+SET ReturnDate = CURDATE()
+WHERE BookID = 1 AND ReturnDate IS NULL;
